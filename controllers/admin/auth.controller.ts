@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import prisma from '../../config/prisma';
 import { AuthenticatedAdminRequest } from '../../types';
+import adminAuthMiddleware from '../../middlewares/auth.middleware';
 
 const router = express.Router();
 
@@ -50,7 +51,7 @@ router.post('/login', async (req, res) => {
 
         const token = jwt.sign(
             { id: admin.id, email: admin.email },
-            process.env.JWT_SECRET || 'your-secret-key',
+            process.env.JWT_SECRET || '',
             { expiresIn: '24h' }
         );
 
@@ -90,8 +91,7 @@ router.post('/login', async (req, res) => {
 });
 
 
-
-router.post('/register', async (req:AuthenticatedAdminRequest, res) => {
+router.post('/register' , adminAuthMiddleware('admin') , async (req:AuthenticatedAdminRequest, res) => {
     try {
 
         const schema = z.object({
@@ -166,6 +166,118 @@ router.post('/register', async (req:AuthenticatedAdminRequest, res) => {
         return;
     }
 });
+
+
+router.get('/toggle-active-status/:adminId', adminAuthMiddleware('admin'), async (req: AuthenticatedAdminRequest, res) => {
+    try {
+        const { adminId } = req.params;
+        const adminIdNum = Number(adminId);
+
+        if (!adminId || Number.isNaN(adminIdNum)) {
+            res.status(400).json({
+                message: 'Admin ID is required and must be a number',
+                data: null
+            });
+            return;
+        }
+
+        const admin = await prisma.admin.findUnique({
+            where: { id: adminIdNum }
+        });
+
+        if (!admin) {
+            res.status(404).json({
+                message: 'Admin not found',
+                data: null
+            });
+            return;
+        }
+
+        if (req.user && req.user.id === adminIdNum) {
+            res.status(403).json({
+                message: 'You cannot change your own active status',
+                data: null
+            });
+            return;
+        }
+
+        const updatedAdmin = await prisma.admin.update({
+            where: { id: adminIdNum },
+            data: { isActive: !admin.isActive }
+        });
+
+        updatedAdmin.password = '';
+
+        res.json({
+            message: `Admin account ${updatedAdmin.isActive ? 'activated' : 'deactivated'} successfully`,
+            data: {
+                user: updatedAdmin
+            }
+        });
+        return;
+
+    } catch (error) {
+        res.status(500).json({
+            message: 'Internal server error',
+            data: null
+        });
+        return;
+    }
+});
+
+
+
+router.get('/me', adminAuthMiddleware(), async (req: AuthenticatedAdminRequest, res) => {
+    try {
+        if (!req.user) {
+            res.status(401).json({
+                message: 'Unauthorized',
+                data: null
+            });
+            return;
+        }
+
+        const admin = await prisma.admin.findUnique({
+            where: { id: req.user.id },
+            select: {
+                id: true,
+                email: true,
+                name: true,
+                address: true,
+                phone: true,
+                role: true,
+                isActive: true,
+                lastLogin: true,
+                createdAt: true,
+            }
+        });
+
+        if (!admin) {
+            res.status(404).json({
+                message: 'Admin not found',
+                data: null
+            });
+            return;
+        }
+
+        res.json({
+            message: 'Current user retrieved successfully',
+            data: {
+                user: admin
+            }
+        });
+        return;
+
+    } catch (error) {
+        res.status(500).json({
+            message: 'Internal server error',
+            data: null
+        });
+        return;
+    }
+});
+
+
 
 export default router;
 
