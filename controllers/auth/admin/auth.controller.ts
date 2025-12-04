@@ -2,9 +2,9 @@ import express from 'express';
 import { z } from 'zod';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import prisma from '../../config/prisma';
-import { AuthenticatedAdminRequest } from '../../types';
-import adminAuthMiddleware from '../../middlewares/auth.middleware';
+import prisma from '../../../config/prisma';
+import { AuthenticatedAdminRequest } from '../../../types';
+import adminAuthMiddleware from '../../../middlewares/auth.middleware';
 
 const router = express.Router();
 
@@ -403,7 +403,6 @@ router.put('/edit/:adminId', adminAuthMiddleware('admin'), async (req: Authentic
         return;
     }
 });
-
 
 
 router.get('/all', adminAuthMiddleware('moderator'), async (req: AuthenticatedAdminRequest, res) => {
