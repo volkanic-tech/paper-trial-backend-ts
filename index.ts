@@ -5,7 +5,6 @@ import routes from "./routes/index";
 import fileUpload from "express-fileupload";
 import path from "path";
 
-
 dotenv.config({ path: "./.env" });
 
 const app = express();

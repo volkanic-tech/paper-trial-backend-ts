@@ -22,6 +22,19 @@ model User {
   phone    String   @unique
   email     String   @unique
   password       String
+  isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
 }
 
+model Admin {
+  id        Int      @id @default(autoincrement())
+  name  String
+  email     String   @unique
+  phone   String   @unique
+  address   String
+  password  String
+  lastLogin DateTime?
+  role      String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
