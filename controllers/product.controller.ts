@@ -213,6 +213,7 @@ router.post('/add-products', adminAuthMiddleware('admin'), async (req: Authentic
     }
 });
 
+
 router.patch('/edit-product/:productId', adminAuthMiddleware('admin'), async (req: AuthenticatedAdminRequest, res) => {
     try {
         const { productId } = req.params;
@@ -473,7 +474,8 @@ router.patch('/edit-product/:productId', adminAuthMiddleware('admin'), async (re
     }
 });
 
-router.get('/get-products', async (req, res) => {
+
+router.get('/get-products',  adminAuthMiddleware('moderator'), async (req: AuthenticatedAdminRequest, res) => {
     try {
 
         const page = parseInt(req.query.page as string) || 1;
@@ -586,5 +588,93 @@ router.get('/get-products', async (req, res) => {
         return;
     }
 });
+
+
+router.get('/get-product/:productId',  adminAuthMiddleware('moderator'), async (req: AuthenticatedAdminRequest, res) => {
+    try {
+        const { productId } = req.params;
+        const productIdNum = parseInt(productId);
+
+        if (!productId || isNaN(productIdNum)) {
+            res.status(400).json({
+                message: 'Product ID is required and must be a number',
+                data: null
+            });
+            return;
+        }
+
+        const product = await prisma.product.findUnique({
+            where: { id: productIdNum },
+            include: {
+                category: {
+                    select: {
+                        id: true,
+                        name: true,
+                        isActive: true
+                    }
+                },
+                images: {
+                    orderBy: {
+                        isPrimary: 'desc'
+                    }
+                }
+            }
+        });
+
+        if (!product) {
+            res.status(404).json({
+                message: 'Product not found',
+                data: null
+            });
+            return;
+        }
+
+        res.json({
+            message: 'Product retrieved successfully',
+            data: product
+        });
+        return;
+
+    }catch (error) {
+        console.error('Get product error:', error);
+        res.status(500).json({
+            message: 'Internal server error',
+            data: null
+        });
+        return;
+    }
+
+});
+
+
+router.get('/get-stats', adminAuthMiddleware('moderator'), async (req: AuthenticatedAdminRequest, res) => {
+    try {
+        const totalProducts = await prisma.product.count();
+        const lowStockProducts = await prisma.product.count({ where: { stock: { lte: 5 } } });
+        const outOfStockProducts = await prisma.product.count({ where: { stock: 0 } });
+        const totalCategories = await prisma.category.count();
+
+        res.json({
+            message: 'Product statistics retrieved successfully',
+            data: {
+                totalProducts,
+                lowStockProducts,
+                outOfStockProducts,
+                totalCategories
+            }
+        });
+
+        return;
+
+    } catch (error) {
+        console.error('Get product statistics error:', error);
+        res.status(500).json({
+            message: 'Internal server error',
+            data: null
+        });
+        return;
+    }
+});
+
 
 export default router;
