@@ -27,7 +27,7 @@ const adminAuthMiddleware = (requiredRole?: string) => {
         const token = authHeader.split(" ")[1];
 
         try {
-            const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { id: string; email: string; role?: string };
+            const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { id: string; email: string; role?: string , base_role?: string};
             const user = await prisma.admin.findUnique({ where: { email: decoded.email } });
             // const authToken = await prisma.authToken.findUnique({ where: { tokenValue: token } })
 
@@ -43,6 +43,11 @@ const adminAuthMiddleware = (requiredRole?: string) => {
 
             if(!user.isActive){
                 res.status(403).json({ message: "Admin account is not activated!" });
+                return
+            }
+
+            if (decoded.base_role !== 'admin') {
+                res.status(403).json({ message: "Access denied. Not an admin account." });
                 return
             }
 
