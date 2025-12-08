@@ -677,4 +677,227 @@ router.get('/get-stats', adminAuthMiddleware('moderator'), async (req: Authentic
 });
 
 
+router.post('/bulk-upload', adminAuthMiddleware('admin'), async (req: AuthenticatedAdminRequest, res) => {
+    try {
+
+        if (!req.files || !req.files.csvFile) {
+            res.status(400).json({
+                message: 'CSV file is required',
+                data: null
+            });
+            return;
+        }
+
+        const csvFile = req.files.csvFile as UploadedFile;
+
+        if (csvFile.mimetype !== 'text/csv' && !csvFile.name.endsWith('.csv')) {
+            res.status(400).json({
+                message: 'Invalid file type. Only CSV files are allowed',
+                data: null
+            });
+            return;
+        }
+
+        const csvContent = csvFile.data.toString('utf-8');
+        const lines = csvContent.split('\n').filter(line => line.trim());
+
+        if (lines.length < 2) {
+            res.status(400).json({
+                message: 'CSV file is empty or contains only headers',
+                data: null
+            });
+            return;
+        }
+
+        const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+        
+        const requiredHeaders = ['sku', 'name', 'price', 'originalPrice', 'costPrice', 'categoryId', 'stock'];
+        const missingHeaders = requiredHeaders.filter(h => !headers.includes(h));
+
+        if (missingHeaders.length > 0) {
+            res.status(400).json({
+                message: `Missing required CSV headers: ${missingHeaders.join(', ')}`,
+                data: null
+            });
+            return;
+        }
+
+        const results = {
+            successful: [] as any[],
+            failed: [] as any[]
+        };
+
+        for (let i = 1; i < lines.length; i++) {
+            try {
+                const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
+                const rowData: any = {};
+
+                headers.forEach((header, index) => {
+                    rowData[header] = values[index];
+                });
+
+                const productData = {
+                    sku: rowData.sku,
+                    name: rowData.name,
+                    description: rowData.description || undefined,
+                    price: parseFloat(rowData.price),
+                    originalPrice: parseFloat(rowData.originalPrice),
+                    costPrice: parseFloat(rowData.costPrice),
+                    features: rowData.features || '',
+                    specifications: rowData.specifications || '',
+                    categoryId: parseInt(rowData.categoryId),
+                    stock: parseInt(rowData.stock),
+                    isActive: rowData.isActive === 'true' || rowData.isActive === '1' || true,
+                    isNew: rowData.isNew === 'true' || rowData.isNew === '1' || true,
+                    isFeatured: rowData.isFeatured === 'true' || rowData.isFeatured === '1' || false,
+                    imageUrls: rowData.imageUrls || ''
+                };
+
+                if (!productData.sku || !productData.name) {
+                    results.failed.push({
+                        row: i + 1,
+                        sku: rowData.sku,
+                        error: 'Missing required fields: sku or name'
+                    });
+                    continue;
+                }
+
+                if (isNaN(productData.price) || isNaN(productData.originalPrice) || isNaN(productData.costPrice)) {
+                    results.failed.push({
+                        row: i + 1,
+                        sku: rowData.sku,
+                        error: 'Invalid price values'
+                    });
+                    continue;
+                }
+
+                const existingProduct = await prisma.product.findUnique({
+                    where: { sku: productData.sku }
+                });
+
+                if (existingProduct) {
+                    results.failed.push({
+                        row: i + 1,
+                        sku: productData.sku,
+                        error: 'Product with this SKU already exists'
+                    });
+                    continue;
+                }
+
+                const category = await prisma.category.findUnique({
+                    where: { id: productData.categoryId }
+                });
+
+                if (!category) {
+                    results.failed.push({
+                        row: i + 1,
+                        sku: productData.sku,
+                        error: 'Category not found'
+                    });
+                    continue;
+                }
+
+                if (!category.isActive) {
+                    results.failed.push({
+                        row: i + 1,
+                        sku: productData.sku,
+                        error: 'Category is not active'
+                    });
+                    continue;
+                }
+
+                const imageUrls: Array<{ url: string; altText?: string; isPrimary: boolean }> = [];
+                
+                if (productData.imageUrls && productData.imageUrls.trim()) {
+                    
+                    const urlList = productData.imageUrls.split(/[|;]/).map((url: string) => url.trim()).filter((url: string) => url);
+                    
+                    urlList.forEach((url: string, index: number) => {
+                        try {
+                            new URL(url);
+                            imageUrls.push({
+                                url: url,
+                                altText: productData.name,
+                                isPrimary: index === 0
+                            });
+                        } catch (error) {
+                            console.warn(`Invalid URL in row ${i + 1}: ${url}`);
+                        }
+                    });
+                }
+
+                // Create product with image links
+                const product = await prisma.product.create({
+                    data: {
+                        sku: productData.sku,
+                        name: productData.name,
+                        description: productData.description,
+                        price: productData.price,
+                        originalPrice: productData.originalPrice,
+                        costPrice: productData.costPrice,
+                        features: productData.features,
+                        specifications: productData.specifications,
+                        categoryId: productData.categoryId,
+                        stock: productData.stock,
+                        isActive: productData.isActive,
+                        isNew: productData.isNew,
+                        isFeatured: productData.isFeatured,
+                        images: imageUrls.length > 0 ? {
+                            create: imageUrls.map(img => ({
+                                url: img.url,
+                                altText: img.altText,
+                                isPrimary: img.isPrimary
+                            }))
+                        } : undefined
+                    },
+                    include: {
+                        category: {
+                            select: {
+                                id: true,
+                                name: true
+                            }
+                        },
+                        images: true
+                    }
+                });
+
+                results.successful.push({
+                    row: i + 1,
+                    sku: productData.sku,
+                    name: productData.name,
+                    productId: product.id,
+                    imagesCount: imageUrls.length
+                });
+
+            } catch (error) {
+                results.failed.push({
+                    row: i + 1,
+                    error: error instanceof Error ? error.message : 'Unknown error'
+                });
+            }
+        }
+
+        res.status(201).json({
+            message: 'Bulk upload completed',
+            data: {
+                summary: {
+                    total: lines.length - 1,
+                    successful: results.successful.length,
+                    failed: results.failed.length
+                },
+                results
+            }
+        });
+        return;
+
+    } catch (error) {
+        console.error('Bulk upload error:', error);
+        res.status(500).json({
+            message: 'Internal server error',
+            data: null
+        });
+        return;
+    }
+});
+
 export default router;
