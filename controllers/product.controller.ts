@@ -84,10 +84,10 @@ router.post('/add-products', adminAuthMiddleware('admin'), async (req: Authentic
 
         // Handle file uploads using express-fileupload
         const uploadedImages: Array<{ url: string; altText?: string; isPrimary: boolean }> = [];
-        
+
         if (req.files && req.files.images) {
             const uploadDir = ensureUploadDir();
-            
+
             // express-fileupload provides files in req.files
             const images = req.files.images;
             const fileArray: UploadedFile[] = Array.isArray(images) ? images : [images];
@@ -122,7 +122,7 @@ router.post('/add-products', adminAuthMiddleware('admin'), async (req: Authentic
 
                 // Use express-fileupload's mv() method to move the uploaded file
                 await file.mv(filePath);
-                
+
                 uploadedImages.push({
                     url: `/uploads/products/${uniqueFilename}`,
                     altText: altTexts[i] || undefined,
@@ -259,7 +259,7 @@ router.patch('/edit-product/:productId', adminAuthMiddleware('admin'), async (re
         if (bodyData.isActive !== undefined) bodyData.isActive = bodyData.isActive === 'true' || bodyData.isActive === true;
         if (bodyData.isNew !== undefined) bodyData.isNew = bodyData.isNew === 'true' || bodyData.isNew === true;
         if (bodyData.isFeatured !== undefined) bodyData.isFeatured = bodyData.isFeatured === 'true' || bodyData.isFeatured === true;
-        
+
         if (bodyData.imageLinks) {
             bodyData.imageLinks = typeof bodyData.imageLinks === 'string' ? JSON.parse(bodyData.imageLinks) : bodyData.imageLinks;
         }
@@ -319,7 +319,7 @@ router.patch('/edit-product/:productId', adminAuthMiddleware('admin'), async (re
         }
 
         if (validatedData.deleteImageIds && validatedData.deleteImageIds.length > 0) {
-            
+
             const imagesToDelete = await prisma.productImage.findMany({
                 where: {
                     id: { in: validatedData.deleteImageIds },
@@ -346,7 +346,7 @@ router.patch('/edit-product/:productId', adminAuthMiddleware('admin'), async (re
         }
 
         const uploadedImages: Array<{ url: string; altText?: string; isPrimary: boolean }> = [];
-        
+
         if (req.files && req.files.images) {
             const uploadDir = ensureUploadDir();
             const images = req.files.images;
@@ -381,7 +381,7 @@ router.patch('/edit-product/:productId', adminAuthMiddleware('admin'), async (re
                 const filePath = path.join(uploadDir, uniqueFilename);
 
                 await file.mv(filePath);
-                
+
                 uploadedImages.push({
                     url: `/uploads/products/${uniqueFilename}`,
                     altText: altTexts[i] || undefined,
@@ -475,7 +475,7 @@ router.patch('/edit-product/:productId', adminAuthMiddleware('admin'), async (re
 });
 
 
-router.get('/get-products',  adminAuthMiddleware('moderator'), async (req: AuthenticatedAdminRequest, res) => {
+router.get('/get-products', adminAuthMiddleware('moderator'), async (req: AuthenticatedAdminRequest, res) => {
     try {
 
         const page = parseInt(req.query.page as string) || 1;
@@ -590,7 +590,7 @@ router.get('/get-products',  adminAuthMiddleware('moderator'), async (req: Authe
 });
 
 
-router.get('/get-product/:productId',  adminAuthMiddleware('moderator'), async (req: AuthenticatedAdminRequest, res) => {
+router.get('/get-product/:productId', adminAuthMiddleware('moderator'), async (req: AuthenticatedAdminRequest, res) => {
     try {
         const { productId } = req.params;
         const productIdNum = parseInt(productId);
@@ -635,7 +635,7 @@ router.get('/get-product/:productId',  adminAuthMiddleware('moderator'), async (
         });
         return;
 
-    }catch (error) {
+    } catch (error) {
         console.error('Get product error:', error);
         res.status(500).json({
             message: 'Internal server error',
@@ -710,7 +710,7 @@ router.post('/bulk-upload', adminAuthMiddleware('admin'), async (req: Authentica
         }
 
         const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
-        
+
         const requiredHeaders = ['sku', 'name', 'price', 'originalPrice', 'costPrice', 'categoryId', 'stock'];
         const missingHeaders = requiredHeaders.filter(h => !headers.includes(h));
 
@@ -807,11 +807,11 @@ router.post('/bulk-upload', adminAuthMiddleware('admin'), async (req: Authentica
                 }
 
                 const imageUrls: Array<{ url: string; altText?: string; isPrimary: boolean }> = [];
-                
+
                 if (productData.imageUrls && productData.imageUrls.trim()) {
-                    
+
                     const urlList = productData.imageUrls.split(/[|;]/).map((url: string) => url.trim()).filter((url: string) => url);
-                    
+
                     urlList.forEach((url: string, index: number) => {
                         try {
                             new URL(url);
@@ -899,5 +899,6 @@ router.post('/bulk-upload', adminAuthMiddleware('admin'), async (req: Authentica
         return;
     }
 });
+
 
 export default router;
