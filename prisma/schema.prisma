@@ -10,65 +10,62 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model User {
   id        Int      @id @default(autoincrement())
-  firstName      String
-  lastName       String
+  firstName String
+  lastName  String
   address   String
-  phone    String   @unique
+  phone     String   @unique
   email     String   @unique
-  password       String
+  password  String
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
 }
 
 model Admin {
-  id        Int      @id @default(autoincrement())
-  name  String
-  email     String   @unique
-  phone   String   @unique
+  id        Int       @id @default(autoincrement())
+  name      String
+  email     String    @unique
+  phone     String    @unique
   address   String
   password  String
   lastLogin DateTime?
   role      String
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
 }
 
-
-
 model Category {
-  id        Int      @id @default(autoincrement())
-  name      String   @unique
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
   products  Product[]
 }
 
 model Product {
-  id          Int      @id @default(autoincrement())
-  sku         String   @unique
-  name        String
-  description String?
-  price       Float
-  originalPrice Float
-  costPrice  Float
-  features    Json
+  id             Int            @id @default(autoincrement())
+  sku            String         @unique
+  name           String
+  description    String?
+  price          Float
+  originalPrice  Float
+  costPrice      Float
+  features       Json
   specifications Json
-  categoryId    Int
-  category    Category @relation(fields: [categoryId], references: [id])
-  stock       Int
-  isActive    Boolean  @default(true)
-  isNew       Boolean  @default(true)
-  isFeatured  Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  images      ProductImage[]
+  categoryId     Int
+  category       Category       @relation(fields: [categoryId], references: [id])
+  stock          Int
+  isActive       Boolean        @default(true)
+  isNew          Boolean        @default(true)
+  isFeatured     Boolean        @default(false)
+  createdAt      DateTime       @default(now())
+  images         ProductImage[]
 }
-
 
 model ProductImage {
   id        Int      @id @default(autoincrement())

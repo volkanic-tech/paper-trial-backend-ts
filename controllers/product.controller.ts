@@ -3,10 +3,10 @@ import { z } from 'zod';
 import prisma from '../config/prisma';
 import adminAuthMiddleware from '../middlewares/auth.middleware';
 import { AuthenticatedAdminRequest } from '../types';
-import path from 'path';
+import path from 'node:path';
 import { ensureUploadDir, generateUniqueFilename } from '../utils/file';
 import { UploadedFile } from 'express-fileupload';
-import fs from 'fs';
+import fs from 'node:fs';
 
 const router = express.Router();
 
