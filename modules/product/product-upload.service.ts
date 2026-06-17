@@ -2,7 +2,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 import { FileArray, UploadedFile } from 'express-fileupload';
 import { ensureUploadDir, generateUniqueFilename } from '../../utils/file';
-import { BadRequestError } from './product.errors';
+import { BadRequestError } from '../common/error';
 import { ProductImageInput } from './product.schemas';
 
 const allowedImageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];

@@ -1,7 +1,5 @@
 import { Request, Response } from 'express';
-import { z } from 'zod';
 import { AuthenticatedAdminRequest } from '../../../types';
-import { AppError } from '../../common/error';
 import {
     editAdminSchema,
     listAdminsQuerySchema,
@@ -98,27 +96,4 @@ export class AdminAuthController {
             handleError(error, res, 'Get admins error:');
         }
     };
-
-    private handleError(error: unknown, res: Response) {
-        if (error instanceof z.ZodError) {
-            res.status(400).json({
-                message: 'Validation error',
-                errors: error.errors
-            });
-            return;
-        }
-
-        if (error instanceof AppError) {
-            res.status(error.statusCode).json({
-                message: error.message,
-                data: error.data
-            });
-            return;
-        }
-
-        res.status(500).json({
-            message: 'Internal server error',
-            data: null
-        });
-    }
 }

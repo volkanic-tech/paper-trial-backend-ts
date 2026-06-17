@@ -1,8 +1,7 @@
 import { Response } from 'express';
 import { UploadedFile } from 'express-fileupload';
-import { z } from 'zod';
 import { AuthenticatedAdminRequest } from '../../types';
-import { AppError, BadRequestError } from '../common/error';
+import { BadRequestError } from '../common/error';
 import {
     createProductSchema,
     listProductsQuerySchema,
