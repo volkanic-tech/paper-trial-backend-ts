@@ -1,8 +1,6 @@
-import express, { Request, Response } from 'express';
+import { Request, Response } from 'express';
 import { z } from 'zod';
-import adminAuthMiddleware from '../../../middlewares/auth.middleware';
 import { AuthenticatedAdminRequest } from '../../../types';
-import { AdminRepository } from './admin.repository';
 import { AppError } from './auth.errors';
 import {
     editAdminSchema,
@@ -11,10 +9,9 @@ import {
     registerAdminSchema
 } from './auth.schemas';
 import { AuthService } from './auth.service';
-import { JwtService } from '../../../services/jwt.service';
 
-class AdminAuthController {
-    constructor(private readonly authService: AuthService) {}
+export class AdminAuthController {
+    constructor(private readonly authService: AuthService) { }
 
     login = async (req: Request, res: Response) => {
         try {
@@ -124,20 +121,3 @@ class AdminAuthController {
         });
     }
 }
-
-const router = express.Router();
-const controller = new AdminAuthController(
-    new AuthService(
-        new AdminRepository(),
-        new JwtService()
-    )
-);
-
-router.post('/login', controller.login);
-router.post('/register', adminAuthMiddleware('admin'), controller.register);
-router.get('/toggle-active-status/:adminId', adminAuthMiddleware('admin'), controller.toggleActiveStatus);
-router.get('/me', adminAuthMiddleware(), controller.me);
-router.put('/edit/:adminId', adminAuthMiddleware('admin'), controller.edit);
-router.get('/all', adminAuthMiddleware('moderator'), controller.all);
-
-export default router;

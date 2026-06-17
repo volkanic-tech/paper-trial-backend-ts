@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 import { Prisma } from '../../../generated/prisma/client';
-import { JwtService } from '../../../services/jwt.service';
+import { JwtService } from '../../../utils/jwt.service';
 import { AdminRepository } from './admin.repository';
 import {
     EditAdminInput,
@@ -20,7 +20,7 @@ export class AuthService {
     constructor(
         private readonly admins: AdminRepository,
         private readonly jwtService: JwtService
-    ) {}
+    ) { }
 
     async login(input: LoginInput) {
         const admin = await this.admins.findByEmail(input.email);

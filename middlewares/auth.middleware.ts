@@ -21,27 +21,22 @@ const adminAuthMiddleware = (requiredRole?: string) => {
 
         if (!authHeader || !authHeader.startsWith("Bearer ")) {
             res.status(401).json({ message: "Access denied. No token provided." });
-            return 
+            return
         }
 
         const token = authHeader.split(" ")[1];
 
         try {
-            const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { id: string; email: string; role?: string , base_role?: string};
+            const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { id: string; email: string; role?: string, base_role?: string };
             const user = await prisma.admin.findUnique({ where: { email: decoded.email } });
             // const authToken = await prisma.authToken.findUnique({ where: { tokenValue: token } })
 
-            if(!user){
+            if (!user) {
                 res.status(404).json({ message: "Admin account not found." });
                 return
             }
 
-            // if(!authToken){
-            //     res.status(401).json({ error: "Unauthorized: Token revoked" });
-            //     return
-            // }
-
-            if(!user.isActive){
+            if (!user.isActive) {
                 res.status(403).json({ message: "Admin account is not activated!" });
                 return
             }
@@ -59,14 +54,14 @@ const adminAuthMiddleware = (requiredRole?: string) => {
 
                 if (userRoleLevel < requiredRoleLevel) {
                     res.status(403).json({ message: "Access denied. Insufficient permissions." });
-                    return 
+                    return
                 }
             }
 
             next();
         } catch (err) {
             res.status(400).json({ message: "Invalid token." });
-            return 
+            return
         }
     };
 
