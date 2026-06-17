@@ -14,7 +14,7 @@ import {
     ForbiddenError,
     NotFoundError,
     UnauthorizedError
-} from './auth.errors';
+} from '../../common/error';
 
 export class AuthService {
     constructor(

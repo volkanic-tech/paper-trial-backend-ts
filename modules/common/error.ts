@@ -1,3 +1,4 @@
+
 export class AppError extends Error {
     constructor(
         public readonly statusCode: number,
@@ -8,6 +9,7 @@ export class AppError extends Error {
         this.name = new.target.name;
     }
 }
+
 
 export class BadRequestError extends AppError {
     constructor(message: string) {

@@ -6,7 +6,7 @@ import {
     ProductImageInput,
     UpdateProductInput
 } from './product.schemas';
-import { BadRequestError, ConflictError, NotFoundError } from './product.errors';
+import { BadRequestError, ConflictError, NotFoundError } from '../common/error';
 import { ProductRepository } from './product.repository';
 import { ProductUploadService } from './product-upload.service';
 
@@ -29,7 +29,7 @@ export class ProductService {
     constructor(
         private readonly products: ProductRepository,
         private readonly uploads: ProductUploadService
-    ) {}
+    ) { }
 
     async createProduct(input: CreateProductInput, uploadedImages: ProductImageInput[]) {
         const existingProduct = await this.products.findBySku(input.sku);
