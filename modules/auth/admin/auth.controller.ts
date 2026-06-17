@@ -9,6 +9,7 @@ import {
     registerAdminSchema
 } from './auth.schemas';
 import { AuthService } from './auth.service';
+import { handleError } from '../../../utils/error-handler';
 
 export class AdminAuthController {
     constructor(private readonly authService: AuthService) { }
@@ -23,7 +24,7 @@ export class AdminAuthController {
                 data
             });
         } catch (error) {
-            this.handleError(error, res);
+            handleError(error, res, 'Login error:');
         }
     };
 
@@ -37,7 +38,7 @@ export class AdminAuthController {
                 data: { user }
             });
         } catch (error) {
-            this.handleError(error, res);
+            handleError(error, res, 'Admin registration error:');
         }
     };
 
@@ -53,7 +54,7 @@ export class AdminAuthController {
                 data: { user }
             });
         } catch (error) {
-            this.handleError(error, res);
+            handleError(error, res, 'Toggle admin status error:');
         }
     };
 
@@ -66,7 +67,7 @@ export class AdminAuthController {
                 data: { user }
             });
         } catch (error) {
-            this.handleError(error, res);
+            handleError(error, res, 'Get current admin error:');
         }
     };
 
@@ -80,7 +81,7 @@ export class AdminAuthController {
                 data: { user }
             });
         } catch (error) {
-            this.handleError(error, res);
+            handleError(error, res, 'Edit admin error:');
         }
     };
 
@@ -94,7 +95,7 @@ export class AdminAuthController {
                 data
             });
         } catch (error) {
-            this.handleError(error, res);
+            handleError(error, res, 'Get admins error:');
         }
     };
 

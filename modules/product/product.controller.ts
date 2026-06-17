@@ -13,6 +13,7 @@ import {
     parseCreateProductBody,
     parseUpdateProductBody
 } from './product.request-parser';
+import { handleError } from '../../utils/error-handler';
 
 export class ProductController {
     constructor(private readonly productService: ProductService) { }
@@ -28,7 +29,7 @@ export class ProductController {
                 data: { product }
             });
         } catch (error) {
-            this.handleError(error, res, 'Product creation error:');
+            handleError(error, res, 'Product creation error:');
         }
     };
 
@@ -47,7 +48,7 @@ export class ProductController {
                 data: { product }
             });
         } catch (error) {
-            this.handleError(error, res, 'Product update error:');
+            handleError(error, res, 'Product update error:');
         }
     };
 
@@ -61,7 +62,7 @@ export class ProductController {
                 data
             });
         } catch (error) {
-            this.handleError(error, res, 'Get products error:');
+            handleError(error, res, 'Get products error:');
         }
     };
 
@@ -74,7 +75,7 @@ export class ProductController {
                 data: product
             });
         } catch (error) {
-            this.handleError(error, res, 'Get product error:');
+            handleError(error, res, 'Get product error:');
         }
     };
 
@@ -87,7 +88,7 @@ export class ProductController {
                 data
             });
         } catch (error) {
-            this.handleError(error, res, 'Get product statistics error:');
+            handleError(error, res, 'Get product statistics error:');
         }
     };
 
@@ -104,31 +105,7 @@ export class ProductController {
                 data
             });
         } catch (error) {
-            this.handleError(error, res, 'Bulk upload error:');
+            handleError(error, res, 'Bulk upload error:');
         }
     };
-
-    private handleError(error: unknown, res: Response, logMessage: string) {
-        if (error instanceof z.ZodError) {
-            res.status(400).json({
-                message: 'Validation error',
-                errors: error.errors
-            });
-            return;
-        }
-
-        if (error instanceof AppError) {
-            res.status(error.statusCode).json({
-                message: error.message,
-                data: error.data
-            });
-            return;
-        }
-
-        console.error(logMessage, error);
-        res.status(500).json({
-            message: 'Internal server error',
-            data: null
-        });
-    }
 }
