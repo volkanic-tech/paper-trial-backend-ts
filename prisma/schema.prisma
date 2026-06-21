@@ -76,3 +76,27 @@ model ProductImage {
   isPrimary Boolean  @default(false)
   createdAt DateTime @default(now())
 }
+
+model QuotationInvoice {
+  id              Int      @id @default(autoincrement())
+  generatedId     String   @unique
+  type            String
+  customerId      Int?
+  customerName    String
+  customerEmail   String
+  customerPhone   String?
+  customerAddress String?
+  issueDate       DateTime
+  expiryDate      DateTime
+  items           Json
+  subtotal        Float
+  taxRate         Float
+  taxAmount       Float
+  shippingFee     Float
+  discountRate    Float
+  discountAmount  Float
+  total           Float
+  status          String
+  notes           String?
+  createdAt       DateTime @default(now())
+}
