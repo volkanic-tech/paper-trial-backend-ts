@@ -21,7 +21,7 @@ WORKDIR /app
 
 COPY package*.json ./
 
-RUN npm install --omit=dev
+RUN npm install --omit=dev --verbose
 
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
