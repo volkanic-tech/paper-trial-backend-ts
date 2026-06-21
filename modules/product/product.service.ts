@@ -9,6 +9,7 @@ import {
 import { BadRequestError, ConflictError, NotFoundError } from '../common/error';
 import { ProductRepository } from './product.repository';
 import { ProductUploadService } from './product-upload.service';
+import { PaginationOptions } from '../common/pagination';
 
 type BulkUploadResult = {
     successful: Array<{
@@ -102,7 +103,7 @@ export class ProductService {
                 limit: input.limit,
                 hasNextPage: input.page < totalPages,
                 hasPreviousPage: input.page > 1
-            }
+            } as PaginationOptions
         };
     }
 
