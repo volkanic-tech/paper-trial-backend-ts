@@ -3,11 +3,15 @@ import adminAuthMiddleware from '../../middlewares/auth.middleware';
 import { InvoiceController } from './invoice.controller';
 import { InvoiceRepository } from './invoice.repository';
 import { QuotationInvoiceService } from './invoice.service';
+import { InvoicePolicyService } from './invoice-policy.service';
+import { InvoiceCalculatorService } from './invoice-calculator.service';
 
 const router = express.Router();
 const invoiceController = new InvoiceController(
     new QuotationInvoiceService(
-        new InvoiceRepository()
+        new InvoiceRepository(),
+        new InvoicePolicyService(),
+        new InvoiceCalculatorService()
     )
 );
 
