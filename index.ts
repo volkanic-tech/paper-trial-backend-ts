@@ -3,7 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import routes from "./routes/index";
 import fileUpload from "express-fileupload";
-import path from "path";
+import path from "node:path";
 
 dotenv.config({ path: "./.env" });
 
@@ -17,12 +17,14 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
 app.use("/uploads", express.static(path.join(__dirname, "./uploads")));
+app.disable("x-powered-by");
+
 
 app.get("/", async (req, res) => {
   res.send("Hello, TypeScript Express API!");
 });
 
-app.use("/api/v1" , routes);
+app.use("/api/v1", routes);
 app.listen(PORT, () => console.log("Server running on http://localhost:" + PORT));
 
 

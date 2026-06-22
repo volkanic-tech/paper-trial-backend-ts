@@ -54,7 +54,4 @@ export class InvoicePolicyService {
         }
     }
 
-
-
-
 }
