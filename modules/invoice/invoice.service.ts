@@ -29,7 +29,7 @@ export class QuotationInvoiceService {
         return this.invoiceRepository.create({
             ...input,
             ...totals,
-            items: totals.items as unknown as Prisma.InputJsonValue
+            items: totals.items
         });
     }
 
@@ -89,7 +89,7 @@ export class QuotationInvoiceService {
 
             Object.assign(updateData, {
                 ...totals,
-                items: totals.items as unknown as Prisma.InputJsonValue
+                items: totals.items
             });
         }
 
@@ -150,7 +150,7 @@ export class QuotationInvoiceService {
             customerAddress: quotation.customerAddress,
             issueDate,
             expiryDate,
-            items: items as unknown as Prisma.InputJsonValue,
+            items,
             subtotal: quotation.subtotal,
             taxRate: quotation.taxRate,
             taxAmount: quotation.taxAmount,

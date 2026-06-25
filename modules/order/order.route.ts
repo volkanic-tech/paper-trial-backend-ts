@@ -3,13 +3,15 @@ import adminAuthMiddleware from '../../middlewares/auth.middleware';
 import { OrderController } from './order.controller';
 import { OrderRepository } from './order.repository';
 import { OrderService } from './order.service';
+import { OrderPolicyService } from './order-policy.service';
 
 const router = express.Router();
 
 const orderController = new OrderController(
     new OrderService(
-        new OrderRepository()
-    )
+        new OrderRepository(),
+        new OrderPolicyService(new OrderRepository()),
+    ),
 );
 
 router.route('/')
