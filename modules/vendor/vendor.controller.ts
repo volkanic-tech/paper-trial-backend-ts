@@ -2,14 +2,15 @@ import { Response } from "express";
 import { AuthenticatedAdminRequest } from "../../types";
 import { VendorService } from "./vendor.service";
 import { handleError } from "../../utils/error-handler";
-import { createVendorSchema, listVendorsQuerySchema, updateVendorSchema } from "./vendor.schemas";
+import { createVendorSchema, listVendorsQuerySchema, updateVendorSchema, vendorIdParamSchema } from "./vendor.schemas";
 
 export class VendorController {
     constructor(private vendorService: VendorService) { }
 
     getVendorById = async (req: AuthenticatedAdminRequest, res: Response) => {
         try {
-            const vendor = await this.vendorService.getVendorById(Number(req.params.id));
+            const input = vendorIdParamSchema.parse(req.params);
+            const vendor = await this.vendorService.getVendorById(input.id);
             res.status(200).json({
                 message: "Vendor retrieved successfully",
                 data: { vendor }
