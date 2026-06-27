@@ -137,3 +137,11 @@ model OrderItem {
   quantity  Int
   price     Float
 }
+
+model Vendor {
+  id      Int    @id @default(autoincrement())
+  name    String
+  address String
+  phone   String @unique
+  email   String @unique
+}
