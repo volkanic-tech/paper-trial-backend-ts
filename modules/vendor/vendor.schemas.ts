@@ -11,7 +11,7 @@ export const createVendorSchema = z.object({
 export const updateVendorSchema = createVendorSchema.partial();
 
 export const listVendorsQuerySchema = listQuerySchema.extend({
-    sortBy: z.enum(['name', 'email', 'createdAt']).default('createdAt'),
+    sortBy: z.enum(['name', 'email']).default('name'),
     sortOrder: z.enum(['asc', 'desc']).default('desc')
 });
 

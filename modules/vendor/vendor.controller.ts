@@ -9,7 +9,7 @@ export class VendorController {
 
     getVendorById = async (req: AuthenticatedAdminRequest, res: Response) => {
         try {
-            const vendor = await this.vendorService.getVendorById(Number(req.params.vendorId));
+            const vendor = await this.vendorService.getVendorById(Number(req.params.id));
             res.status(200).json({
                 message: "Vendor retrieved successfully",
                 data: { vendor }
@@ -35,7 +35,7 @@ export class VendorController {
     updateVendor = async (req: AuthenticatedAdminRequest, res: Response) => {
         try {
             const input = updateVendorSchema.parse(req.body);
-            const vendor = await this.vendorService.updateVendor(Number(req.params.vendorId), input);
+            const vendor = await this.vendorService.updateVendor(Number(req.params.id), input);
             res.status(200).json({
                 message: "Vendor updated successfully",
                 data: { vendor }
@@ -47,7 +47,7 @@ export class VendorController {
 
     deleteVendor = async (req: AuthenticatedAdminRequest, res: Response) => {
         try {
-            await this.vendorService.deleteVendor(Number(req.params.vendorId));
+            await this.vendorService.deleteVendor(Number(req.params.id));
             res.status(200).json({
                 message: "Vendor deleted successfully"
             });
