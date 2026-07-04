@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const orderStatuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'] as const;
-export const paymentStatuses = ['pending', 'paid', 'failed', 'refunded'] as const;
+export const paymentStatuses = ['pending', 'unpaid', 'paid', 'failed', 'refunded'] as const;
 export const paymentMethods = ['cash', 'card', 'bank_transfer', 'online'] as const;
 
 const optionalQueryNumber = z.preprocess(

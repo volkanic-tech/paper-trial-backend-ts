@@ -207,4 +207,11 @@ export class OrderService {
         return this.ordersRepository.getStats();
     }
 
+    dispatchOrder(input: CreateOrderInput) {
+        return this.createOrder({
+            ...input,
+            paymentStatus: 'unpaid'
+        });
+    }
+
 }
