@@ -11,7 +11,7 @@ import {
 import { OrderService } from './order.service';
 
 export class OrderController {
-    constructor(private readonly orderService: OrderService) {}
+    constructor(private readonly orderService: OrderService) { }
 
     create = async (req: AuthenticatedAdminRequest, res: Response) => {
         try {
@@ -134,4 +134,19 @@ export class OrderController {
             handleError(error, res, 'Get order statistics error:');
         }
     };
+
+    dispatchOrder = async (req: AuthenticatedAdminRequest, res: Response) => {
+        try {
+            const input = createOrderSchema.parse(req.body);
+            const order = await this.orderService.dispatchOrder(input);
+
+            res.status(201).json({
+                message: 'Order dispatched successfully',
+                data: { order }
+            });
+        } catch (error) {
+            handleError(error, res, 'Dispatch order error:');
+        }
+    }
+
 }

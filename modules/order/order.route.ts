@@ -21,6 +21,9 @@ router.route('/')
 router.route('/stats')
     .get(adminAuthMiddleware('moderator'), orderController.stats);
 
+router.route('/dispatch-order')
+    .post(adminAuthMiddleware('moderator'), orderController.dispatchOrder);
+
 router.route('/uuid/:uuid')
     .get(adminAuthMiddleware('moderator'), orderController.getByUUID);
 
