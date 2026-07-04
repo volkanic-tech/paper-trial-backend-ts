@@ -41,11 +41,22 @@ model Admin {
 }
 
 model Category {
-  id        Int       @id @default(autoincrement())
-  name      String    @unique
-  isActive  Boolean   @default(true)
-  createdAt DateTime  @default(now())
-  products  Product[]
+  id                    Int                   @id @default(autoincrement())
+  name                  String                @unique
+  isActive              Boolean               @default(true)
+  isSubCategory         Boolean               @default(false)
+  createdAt             DateTime              @default(now())
+  products              Product[]
+  categorySubCategories CategorySubCategory[]
+}
+
+model CategorySubCategory {
+  id         Int      @id @default(autoincrement())
+  name       String   @unique
+  categoryId Int
+  category   Category @relation(fields: [categoryId], references: [id])
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
 }
 
 model Product {

@@ -10,7 +10,7 @@ import {
 import { QuotationInvoiceService } from './invoice.service';
 
 export class InvoiceController {
-    constructor(private readonly invoiceService: QuotationInvoiceService) {}
+    constructor(private readonly invoiceService: QuotationInvoiceService) { }
 
     createInvoice = async (req: AuthenticatedAdminRequest, res: Response) => {
         try {
