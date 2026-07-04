@@ -54,7 +54,7 @@ model CategorySubCategory {
   id         Int      @id @default(autoincrement())
   name       String   @unique
   categoryId Int
-  category   Category @relation(fields: [categoryId], references: [id])
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   isActive   Boolean  @default(true)
   createdAt  DateTime @default(now())
 }
@@ -70,7 +70,7 @@ model Product {
   features       Json
   specifications Json
   categoryId     Int
-  category       Category       @relation(fields: [categoryId], references: [id])
+  category       Category       @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   stock          Int
   isActive       Boolean        @default(true)
   isNew          Boolean        @default(true)
