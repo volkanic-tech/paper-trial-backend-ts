@@ -24,6 +24,16 @@ export class CategoryRepository {
         return prisma.category.findUnique({ where: { id } });
     }
 
+    findByIds = (ids: number[]) => {
+        return prisma.category.findMany({
+            where: {
+                id: {
+                    in: ids
+                }
+            }
+        });
+    }
+
     findByName = (name: string) => {
         return prisma.category.findUnique({ where: { name } });
     }
@@ -36,13 +46,24 @@ export class CategoryRepository {
         return prisma.product.findMany({ where: { categoryId } });
     }
 
-    addSubCategories = (categoryId: number, subCategoryIds: number[]) => {
-        return prisma.category.update({
+    addSubCategories = async (categoryId: number, subCategoryNames: string[]) => {
+        await prisma.$transaction(
+            subCategoryNames.map(subCategoryName =>
+                prisma.categorySubCategory.upsert({
+                    where: { name: subCategoryName },
+                    update: { categoryId },
+                    create: {
+                        name: subCategoryName,
+                        categoryId
+                    }
+                })
+            )
+        );
+
+        return prisma.category.findUnique({
             where: { id: categoryId },
-            data: {
-                categorySubCategories: {
-                    connect: subCategoryIds.map(subCategoryId => ({ id: subCategoryId }))
-                }
+            include: {
+                categorySubCategories: true
             }
         });
     }
