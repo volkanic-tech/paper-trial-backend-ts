@@ -38,8 +38,14 @@ export class CategoryRepository {
         return prisma.category.findUnique({ where: { name } });
     }
 
-    delete = (id: number) => {
-        return prisma.category.delete({ where: { id } });
+    delete = async (id: number) => {
+        return prisma.$transaction(async (tx) => {
+            await tx.categorySubCategory.deleteMany({
+                where: { categoryId: id }
+            });
+
+            return tx.category.delete({ where: { id } });
+        });
     }
 
     findProductsByCategoryId = (categoryId: number) => {
