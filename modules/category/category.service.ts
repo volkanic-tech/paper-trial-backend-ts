@@ -1,4 +1,4 @@
-import { ConflictError, NotFoundError } from "../common/error";
+import { BadRequestError, ConflictError, NotFoundError } from "../common/error";
 import { CategoryRepository } from "./category.repository";
 import { AddSubCategoryToCategoryInput, CreateCategoryInput, UpdateCategoryInput } from "./category.schema";
 
@@ -48,14 +48,23 @@ export class CategoryService {
             throw new NotFoundError(`Category with ID ${subCategories.categoryId} not found`);
         }
 
+        const subCategoriesToAttach = await this.categoryRepository.findByIds(subCategories.subCategoryIds);
+
         for (const subCategoryId of subCategories.subCategoryIds) {
-            const subCategory = await this.categoryRepository.findById(subCategoryId);
+            const subCategory = subCategoriesToAttach.find(item => item.id === subCategoryId);
             if (!subCategory) {
                 throw new NotFoundError(`Sub-category with ID ${subCategoryId} not found`);
             }
+
+            if (!subCategory.isSubCategory) {
+                throw new BadRequestError(`Category with ID ${subCategoryId} is not marked as a sub-category`);
+            }
         }
 
-        return this.categoryRepository.addSubCategories(subCategories.categoryId, subCategories.subCategoryIds);
+        return this.categoryRepository.addSubCategories(
+            subCategories.categoryId,
+            subCategoriesToAttach.map(subCategory => subCategory.name)
+        );
     }
 
     deleteCategory = async (id: number) => {
