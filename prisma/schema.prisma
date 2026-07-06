@@ -15,16 +15,17 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  firstName String
-  lastName  String
-  address   String
-  phone     String   @unique
-  email     String   @unique
-  password  String
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  orders    Order[]
+  id         Int      @id @default(autoincrement())
+  firstName  String
+  lastName   String
+  address    String
+  phone      String   @unique
+  email      String   @unique
+  password   String
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  isInternal Boolean  @default(false)
+  orders     Order[]
 }
 
 model Admin {
