@@ -7,4 +7,5 @@ router.use('/invoice', require('../modules/invoice/invoice.route').default);
 router.use('/order', require('../modules/order/order.route').default);
 router.use('/vendor', require('../modules/vendor/vendor.route').default);
 router.use('/category', require('../modules/category/category.route').default);
+router.use('/auth/customer', require('../modules/auth/customer/customer.route').default);
 export default router;
