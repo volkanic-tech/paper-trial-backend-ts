@@ -1,6 +1,6 @@
 import prisma from "../../../config/prisma";
 import { Prisma } from "../../../generated/prisma/client";
-import { UserCreateInput } from "../../../generated/prisma/models";
+import { UserCreateInput, UserUpdateInput } from "../../../generated/prisma/models";
 import { ListUsersQueryInput } from "./customer.schema";
 
 export const safeCustomerSelect = {
@@ -34,8 +34,12 @@ export class CustomerRepository {
         return prisma.user.create({ data });
     }
 
-    update = (data: UserCreateInput, id: number) => {
+    update = (data: UserUpdateInput, id: number) => {
         return prisma.user.update({ where: { id }, data });
+    }
+
+    changeActiveStatus = (id: number, isActive: boolean) => {
+        return prisma.user.update({ where: { id }, data: { isActive } });
     }
 
     findSafeById = (id: number) => {
