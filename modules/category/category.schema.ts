@@ -10,8 +10,7 @@ export const createCategorySchema = z.object({
 export const updateCategorySchema = createCategorySchema.partial();
 
 export const addSubCategoryToCategorySchema = z.object({
-    categoryId: z.number().int().positive('Category ID must be a positive integer'),
-    subCategoryIds: z.array(z.number().int().positive('Subcategory ID must be a positive integer')).nonempty('At least one subcategory ID is required')
+    subCategoryIds: z.array(z.coerce.number().int().positive('Subcategory ID must be a positive integer')).nonempty('At least one subcategory ID is required')
 });
 
 export const listCategoriesQuerySchema = listQuerySchema.extend({

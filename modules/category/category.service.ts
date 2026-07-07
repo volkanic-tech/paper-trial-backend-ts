@@ -1,6 +1,6 @@
 import { BadRequestError, ConflictError, NotFoundError } from "../common/error";
 import { CategoryRepository } from "./category.repository";
-import { AddSubCategoryToCategoryInput, CreateCategoryInput, UpdateCategoryInput } from "./category.schema";
+import { CreateCategoryInput, ListCategoriesQueryInput, UpdateCategoryInput } from "./category.schema";
 
 export class CategoryService {
 
@@ -10,8 +10,8 @@ export class CategoryService {
         return this.categoryRepository.findById(id);
     }
 
-    getAllCategories = () => {
-        return this.categoryRepository.findAll();
+    getAllCategories = (input: ListCategoriesQueryInput) => {
+        return this.categoryRepository.findAll(input);
     }
 
     getProductByCategoryId = (categoryId: number) => {
@@ -42,15 +42,21 @@ export class CategoryService {
         return this.categoryRepository.update(data, id);
     }
 
-    addSubCategoryToCategory = async (subCategories: AddSubCategoryToCategoryInput) => {
-        const category = await this.categoryRepository.findById(subCategories.categoryId);
+    addSubCategoryToCategory = async (categoryId: number, subCategoryIds: number[]) => {
+        const category = await this.categoryRepository.findById(categoryId);
         if (!category) {
-            throw new NotFoundError(`Category with ID ${subCategories.categoryId} not found`);
+            throw new NotFoundError(`Category with ID ${categoryId} not found`);
         }
 
-        const subCategoriesToAttach = await this.categoryRepository.findByIds(subCategories.subCategoryIds);
+        if (category.isSubCategory) {
+            throw new BadRequestError(`Category with ID ${categoryId} cannot be used as a parent category`);
+        }
 
-        for (const subCategoryId of subCategories.subCategoryIds) {
+        const uniqueSubCategoryIds = [...new Set(subCategoryIds)];
+
+        const subCategoriesToAttach = await this.categoryRepository.findByIds(uniqueSubCategoryIds);
+
+        for (const subCategoryId of uniqueSubCategoryIds) {
             const subCategory = subCategoriesToAttach.find(item => item.id === subCategoryId);
             if (!subCategory) {
                 throw new NotFoundError(`Sub-category with ID ${subCategoryId} not found`);
@@ -59,12 +65,13 @@ export class CategoryService {
             if (!subCategory.isSubCategory) {
                 throw new BadRequestError(`Category with ID ${subCategoryId} is not marked as a sub-category`);
             }
+
+            if (subCategoryId === categoryId) {
+                throw new BadRequestError(`Category with ID ${categoryId} cannot be added as its own sub-category`);
+            }
         }
 
-        return this.categoryRepository.addSubCategories(
-            subCategories.categoryId,
-            subCategoriesToAttach.map(subCategory => subCategory.name)
-        );
+        return this.categoryRepository.addSubCategories(categoryId, uniqueSubCategoryIds);
     }
 
     deleteCategory = async (id: number) => {

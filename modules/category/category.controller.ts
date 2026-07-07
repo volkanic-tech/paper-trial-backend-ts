@@ -2,7 +2,7 @@ import { Response } from "express";
 import { AuthenticatedAdminRequest } from "../../types";
 import { CategoryService } from "./category.service";
 import { handleError } from "../../utils/error-handler";
-import { addSubCategoryToCategorySchema, createCategorySchema } from "./category.schema";
+import { addSubCategoryToCategorySchema, createCategorySchema, listCategoriesQuerySchema, updateCategorySchema } from "./category.schema";
 
 
 export class CategoryController {
@@ -10,7 +10,8 @@ export class CategoryController {
 
     findAllCategories = async (req: AuthenticatedAdminRequest, res: Response) => {
         try {
-            const categories = await this.categoryService.getAllCategories();
+            const input = listCategoriesQuerySchema.parse(req.query);
+            const categories = await this.categoryService.getAllCategories(input);
             res.status(200).json(categories);
         } catch (error) {
             handleError(error, res, 'Error fetching categories:');
@@ -42,7 +43,7 @@ export class CategoryController {
 
     updateCategory = async (req: AuthenticatedAdminRequest, res: Response) => {
         try {
-            const input = createCategorySchema.parse(req.body);
+            const input = updateCategorySchema.parse(req.body);
             const category = await this.categoryService.updateCategory(Number(req.params.id), input);
             res.status(200).json(category);
         } catch (error) {
@@ -63,7 +64,7 @@ export class CategoryController {
     addSubCategoryToCategory = async (req: AuthenticatedAdminRequest, res: Response) => {
         try {
             const input = addSubCategoryToCategorySchema.parse(req.body);
-            const category = await this.categoryService.addSubCategoryToCategory(input);
+            const category = await this.categoryService.addSubCategoryToCategory(Number(req.params.id), input.subCategoryIds);
             res.status(200).json(category);
         } catch (error) {
             handleError(error, res, 'Error adding subcategory to category:');

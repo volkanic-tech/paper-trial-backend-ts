@@ -48,16 +48,20 @@ model Category {
   isSubCategory         Boolean               @default(false)
   createdAt             DateTime              @default(now())
   products              Product[]
-  categorySubCategories CategorySubCategory[]
+  categorySubCategories CategorySubCategory[] @relation("CategoryToSubCategories")
+  subCategoryCategories CategorySubCategory[] @relation("SubCategoryToCategories")
 }
 
 model CategorySubCategory {
-  id         Int      @id @default(autoincrement())
-  name       String   @unique
-  categoryId Int
-  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  isActive   Boolean  @default(true)
-  createdAt  DateTime @default(now())
+  id            Int      @id @default(autoincrement())
+  categoryId    Int
+  subCategoryId Int
+  category      Category @relation("CategoryToSubCategories", fields: [categoryId], references: [id], onDelete: Cascade)
+  subCategory   Category @relation("SubCategoryToCategories", fields: [subCategoryId], references: [id], onDelete: Cascade)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+
+  @@unique([categoryId, subCategoryId])
 }
 
 model Product {
