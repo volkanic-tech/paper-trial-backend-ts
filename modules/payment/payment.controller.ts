@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { AuthenticatedAdminRequest } from '../../types';
+import { CustomerRequest } from '../../middlewares/customer.middleware';
 import { handleError } from '../../utils/error-handler';
 import { initiatePaymentSchema, webxpayCallbackSchema } from './payment.schemas';
 import { PaymentService } from './payment.service';
@@ -7,10 +7,14 @@ import { PaymentService } from './payment.service';
 export class PaymentController {
     constructor(private readonly paymentService: PaymentService) { }
 
-    initiate = async (req: AuthenticatedAdminRequest, res: Response) => {
+    initiate = async (req: CustomerRequest, res: Response) => {
         try {
             const input = initiatePaymentSchema.parse(req.body);
-            const data = await this.paymentService.initiateOrderPayment(Number(req.params.orderId), input);
+            const data = await this.paymentService.initiateOrderPayment(
+                Number(req.params.orderId),
+                req.user?.id,
+                input
+            );
 
             res.status(201).json({
                 message: 'Payment session created successfully',
@@ -41,9 +45,12 @@ export class PaymentController {
         }
     };
 
-    listOrderPayments = async (req: AuthenticatedAdminRequest, res: Response) => {
+    listOrderPayments = async (req: CustomerRequest, res: Response) => {
         try {
-            const payments = await this.paymentService.listOrderPayments(Number(req.params.orderId));
+            const payments = await this.paymentService.listOrderPayments(
+                Number(req.params.orderId),
+                req.user?.id
+            );
 
             res.json({
                 message: 'Order payments retrieved successfully',

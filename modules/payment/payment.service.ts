@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { BadRequestError, ConflictError, NotFoundError } from '../common/error';
+import { BadRequestError, ConflictError, ForbiddenError, NotFoundError } from '../common/error';
 import { PaymentGateway } from './payment-gateway.interface';
 import { InitiatePaymentInput } from './payment.schemas';
 import { PaymentRepository } from './payment.repository';
@@ -11,13 +11,15 @@ export class PaymentService {
         private readonly paymentGateway: PaymentGateway
     ) { }
 
-    async initiateOrderPayment(orderId: number, input: InitiatePaymentInput) {
+    async initiateOrderPayment(orderId: number, customerId: number | undefined, input: InitiatePaymentInput) {
 
         const order = await this.paymentRepository.findOrderById(orderId);
 
         if (!order) {
             throw new NotFoundError('Order not found');
         }
+
+        this.assertCustomerOwnsOrder(order.userId, customerId);
 
         if (order.status === 'cancelled') {
             throw new ConflictError('Cannot initiate a payment for a cancelled order');
@@ -88,6 +90,9 @@ export class PaymentService {
             gatewayPaymentMethod: result.gatewayPaymentMethod,
             responsePayload: {
                 rawPayment: result.rawPayment,
+                transactionDateTime: result.transactionDateTime,
+                paidAmount: result.paidAmount,
+                orderAmount: result.orderAmount,
                 customFields: result.customFields
             }
         });
@@ -99,8 +104,22 @@ export class PaymentService {
         };
     }
 
-    listOrderPayments(orderId: number) {
+    async listOrderPayments(orderId: number, customerId: number | undefined) {
+        const order = await this.paymentRepository.findOrderById(orderId);
+
+        if (!order) {
+            throw new NotFoundError('Order not found');
+        }
+
+        this.assertCustomerOwnsOrder(order.userId, customerId);
+
         return this.paymentRepository.findTransactionsByOrderId(orderId);
+    }
+
+    private assertCustomerOwnsOrder(orderUserId: number, customerId: number | undefined) {
+        if (!customerId || orderUserId !== customerId) {
+            throw new ForbiddenError('You are not allowed to access payments for this order');
+        }
     }
 
     private buildCustomer(user: {

@@ -1,19 +1,25 @@
-import { constants, publicDecrypt, publicEncrypt } from 'node:crypto';
-
-const encryptionOptions = (publicKey: string) => ({
-    key: publicKey,
-    padding: constants.RSA_PKCS1_PADDING
-});
+import NodeRSA from 'node-rsa';
 
 export class WebxpayCrypto {
     constructor(private readonly publicKey: string) { }
 
     encryptPayment(value: string) {
-        return publicEncrypt(encryptionOptions(this.publicKey), Buffer.from(value, 'utf8')).toString('base64');
+        return this.createKey().encrypt(value, 'base64');
     }
 
-    decryptGatewayValue(value: string) {
-        return publicDecrypt(encryptionOptions(this.publicKey), Buffer.from(value, 'base64')).toString('utf8');
+    decodeGatewayPayment(value: string) {
+        return Buffer.from(value, 'base64').toString('utf8');
+    }
+
+    verifyGatewaySignature(payment: string, signature: string) {
+        const key = this.createKey();
+
+        key.setOptions({ signingScheme: 'pss-sha1' });
+
+        return key.verify(
+            Buffer.from(payment, 'base64'),
+            Buffer.from(signature, 'base64')
+        );
     }
 
     encodeCustomFields(values: string[]) {
@@ -26,5 +32,9 @@ export class WebxpayCrypto {
         }
 
         return Buffer.from(value, 'base64').toString('utf8').split('|');
+    }
+
+    private createKey() {
+        return new NodeRSA(this.publicKey);
     }
 }
