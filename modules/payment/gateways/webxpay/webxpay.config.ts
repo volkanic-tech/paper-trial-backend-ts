@@ -1,3 +1,5 @@
+import { PAYMENT_GATEWAY_ENV } from "../../payment.constant";
+
 export type WebxpayConfig = {
     paymentUrl: string;
     secretKey: string;
@@ -28,10 +30,10 @@ const readKey = (value: string | undefined, name: string) => {
 };
 
 export const getWebxpayConfig = (): WebxpayConfig => {
-    const mode = process.env.WEBXPAY_MODE === 'live' ? 'live' : 'staging';
+    const mode = process.env.WEBXPAY_MODE === PAYMENT_GATEWAY_ENV.LIVE ? PAYMENT_GATEWAY_ENV.LIVE : PAYMENT_GATEWAY_ENV.STAGING;
 
     return {
-        paymentUrl: mode === 'live'
+        paymentUrl: mode === PAYMENT_GATEWAY_ENV.LIVE
             ? process.env.WEBXPAY_PAYMENT_URL_LIVE || liveUrl
             : process.env.WEBXPAY_PAYMENT_URL_STAGING || stagingUrl,
         secretKey: process.env.WEBXPAY_SECRET_KEY || '',
