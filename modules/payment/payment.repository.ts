@@ -4,6 +4,7 @@ import { CompletePaymentTransactionInput, CreatePaymentTransactionInput } from '
 
 
 export class PaymentRepository {
+
     findOrderById(orderId: number) {
         return prisma.order.findUnique({
             where: { id: orderId },
@@ -79,4 +80,5 @@ export class PaymentRepository {
             orderBy: { createdAt: 'desc' }
         });
     }
+
 }

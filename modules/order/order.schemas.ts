@@ -62,6 +62,13 @@ export const createOrderSchema = z.object({
     notes: z.string().trim().optional()
 });
 
+export const createCustomerOrderSchema = z.object({
+    products: z.array(orderItemSchema).nonempty('Products array cannot be empty'),
+    shippingAddress: addressSchema,
+    billingAddress: addressSchema.optional(),
+    notes: z.string().trim().optional()
+});
+
 export const updateOrderSchema = z.object({
     shippingFee: z.number().nonnegative('Shipping fee cannot be negative').optional(),
     taxRate: z.number().min(0).max(100).optional(),
@@ -83,5 +90,6 @@ export const updatePaymentStatusSchema = z.object({
 export type OrderStatus = typeof orderStatuses[number];
 export type PaymentStatus = typeof paymentStatuses[number];
 export type CreateOrderInput = z.infer<typeof createOrderSchema>;
+export type CreateCustomerOrderInput = z.infer<typeof createCustomerOrderSchema>;
 export type UpdateOrderInput = z.infer<typeof updateOrderSchema>;
 export type ListOrdersQueryInput = z.infer<typeof listOrdersQuerySchema>;
