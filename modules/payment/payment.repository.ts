@@ -1,4 +1,5 @@
 import prisma from '../../config/prisma';
+import { PAYMENT_STATUS } from './payment.constant';
 import { CompletePaymentTransactionInput, CreatePaymentTransactionInput } from './payment.schemas';
 
 
@@ -57,7 +58,7 @@ export class PaymentRepository {
                 include: { order: true }
             });
 
-            const orderPaymentStatus = input.status === 'paid' ? 'paid' : 'failed';
+            const orderPaymentStatus = input.status === PAYMENT_STATUS.PAID ? PAYMENT_STATUS.PAID : PAYMENT_STATUS.FAILED;
 
             await transaction.order.update({
                 where: { id: payment.orderId },

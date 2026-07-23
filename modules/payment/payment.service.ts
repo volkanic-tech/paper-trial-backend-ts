@@ -4,6 +4,7 @@ import { PaymentGateway } from './payment-gateway.interface';
 import { InitiatePaymentInput } from './payment.schemas';
 import { PaymentRepository } from './payment.repository';
 import { GatewayCallbackInput, PaymentCustomer } from './payment.types';
+import { PAYMENT_STATUS } from './payment.constant';
 
 export class PaymentService {
     constructor(
@@ -21,11 +22,11 @@ export class PaymentService {
 
         this.assertCustomerOwnsOrder(order.userId, customerId);
 
-        if (order.status === 'cancelled') {
+        if (order.status === PAYMENT_STATUS.CANCELLED) {
             throw new ConflictError('Cannot initiate a payment for a cancelled order');
         }
 
-        if (order.paymentStatus === 'paid') {
+        if (order.paymentStatus === PAYMENT_STATUS.PAID) {
             throw new ConflictError('Order is already paid');
         }
 
@@ -74,7 +75,7 @@ export class PaymentService {
             throw new NotFoundError('Payment transaction not found');
         }
 
-        if (transaction.status === 'paid') {
+        if (transaction.status === PAYMENT_STATUS.PAID) {
             return {
                 payment: transaction,
                 result,

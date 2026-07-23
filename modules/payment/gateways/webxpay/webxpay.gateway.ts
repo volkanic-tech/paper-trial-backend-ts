@@ -1,5 +1,6 @@
 import { BadRequestError } from '../../../common/error';
 import { PaymentGateway } from '../../payment-gateway.interface';
+import { PAYMENT_STATUS } from '../../payment.constant';
 import {
     CreatePaymentSessionInput,
     GatewayCallbackInput,
@@ -109,10 +110,10 @@ export class WebxpayGateway implements PaymentGateway {
 
     private mapStatus(statusCode: string): PaymentTransactionStatus {
         if (statusCode === '0' || statusCode === '00') {
-            return 'paid';
+            return PAYMENT_STATUS.PAID;
         }
 
-        return 'failed';
+        return PAYMENT_STATUS.FAILED;
     }
 
     private assertConfigured() {
