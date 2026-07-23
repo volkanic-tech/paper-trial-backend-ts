@@ -71,15 +71,24 @@ export class WebxpayGateway implements PaymentGateway {
             throw new BadRequestError('Invalid WebX Pay callback payload');
         }
 
-        const rawPayment = this.crypto.decryptGatewayValue(payment);
-        const rawSignature = this.crypto.decryptGatewayValue(signature);
+        const rawPayment = this.crypto.decodeGatewayPayment(payment);
+        const isSignatureValid = this.crypto.verifyGatewaySignature(payment, signature);
         const parts = rawPayment.split('|');
 
         if (parts.length < 6) {
             throw new BadRequestError('Invalid WebX Pay payment response');
         }
 
-        const [internalReference, providerReference, , statusCode, comment, gatewayPaymentMethod] = parts;
+        const [
+            internalReference,
+            providerReference,
+            transactionDateTime,
+            statusCode,
+            comment,
+            gatewayPaymentMethod,
+            paidAmount,
+            orderAmount
+        ] = parts;
 
         return {
             provider: 'webxpay',
@@ -89,8 +98,11 @@ export class WebxpayGateway implements PaymentGateway {
             gatewayStatusCode: statusCode,
             gatewayMessage: comment?.trim(),
             gatewayPaymentMethod,
-            isSignatureValid: rawPayment === rawSignature,
+            isSignatureValid,
             rawPayment,
+            transactionDateTime,
+            paidAmount,
+            orderAmount,
             customFields: this.crypto.decodeCustomFields(input.payload.custom_fields)
         };
     }

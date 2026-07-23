@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { PaymentGatewayName, PaymentTransactionStatus } from './payment.types';
-import { Prisma } from '../../generated/prisma/browser';
+import { Prisma } from '../../generated/prisma/client';
 
 export const initiatePaymentSchema = z.object({
     paymentGatewayId: z.string().trim().min(1).optional(),

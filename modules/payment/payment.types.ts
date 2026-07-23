@@ -46,6 +46,9 @@ export type VerifiedPaymentResult = {
     gatewayStatusCode?: string;
     gatewayMessage?: string;
     gatewayPaymentMethod?: string;
+    transactionDateTime?: string;
+    paidAmount?: string;
+    orderAmount?: string;
     isSignatureValid: boolean;
     rawPayment: string;
     customFields: string[];

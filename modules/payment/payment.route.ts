@@ -1,5 +1,5 @@
 import express from 'express';
-import adminAuthMiddleware from '../../middlewares/auth.middleware';
+import customerAuthMiddleware from '../../middlewares/customer.middleware';
 import { getWebxpayConfig } from './gateways/webxpay/webxpay.config';
 import { WebxpayGateway } from './gateways/webxpay/webxpay.gateway';
 import { PaymentController } from './payment.controller';
@@ -16,10 +16,10 @@ const paymentController = new PaymentController(
 );
 
 router.route('/orders/:orderId/initiate')
-    .post(adminAuthMiddleware('moderator'), paymentController.initiate);
+    .post(customerAuthMiddleware(), paymentController.initiate);
 
 router.route('/orders/:orderId')
-    .get(adminAuthMiddleware('moderator'), paymentController.listOrderPayments);
+    .get(customerAuthMiddleware(), paymentController.listOrderPayments);
 
 router.route('/webxpay/callback')
     .post(paymentController.webxpayCallback);
