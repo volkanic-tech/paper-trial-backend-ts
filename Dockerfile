@@ -9,7 +9,7 @@ RUN npm install
 
 COPY . .
 
-RUN npx prisma generate
+RUN DATABASE_URL="postgresql://postgres:postgres@localhost:5432/paper_trail_db?schema=public" npx prisma generate
 
 RUN npm run build
 
@@ -25,10 +25,11 @@ RUN npm install --omit=dev --verbose
 
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 
-RUN npx prisma generate
+RUN DATABASE_URL="postgresql://postgres:postgres@localhost:5432/paper_trail_db?schema=public" npx prisma generate
 
 EXPOSE 5000
 
-CMD ["sh", "-c", "npx prisma migrate deploy && npx prisma db seed && node dist/index.js"]
+CMD ["sh", "-c", "npx prisma db push && npx prisma db seed && node dist/index.js"]
