@@ -1,5 +1,6 @@
 import express from 'express';
 import adminAuthMiddleware from '../../middlewares/auth.middleware';
+import customerAuthMiddleware from '../../middlewares/customer.middleware';
 import { OrderController } from './order.controller';
 import { OrderRepository } from './order.repository';
 import { OrderService } from './order.service';
@@ -23,6 +24,9 @@ router.route('/stats')
 
 router.route('/dispatch-order')
     .post(adminAuthMiddleware('moderator'), orderController.dispatchOrder);
+
+router.route('/checkout')
+    .post(customerAuthMiddleware(), orderController.createCustomerOrder);
 
 router.route('/uuid/:uuid')
     .get(adminAuthMiddleware('moderator'), orderController.getByUUID);

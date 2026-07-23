@@ -4,6 +4,7 @@ import { PaginationOptions } from '../common/pagination';
 import { OrderPolicyService } from './order-policy.service';
 import { OrderRepository } from './order.repository';
 import {
+    CreateCustomerOrderInput,
     CreateOrderInput,
     ListOrdersQueryInput,
     OrderStatus,
@@ -45,6 +46,22 @@ export class OrderService {
 
             throw error;
         }
+    }
+
+    createCustomerOrder(customerId: number, input: CreateCustomerOrderInput) {
+        return this.createOrder({
+            userId: customerId,
+            products: input.products,
+            shippingFee: 0,
+            taxRate: 0,
+            discountRate: 0,
+            paymentMethod: 'online',
+            paymentStatus: 'unpaid',
+            status: 'pending',
+            shippingAddress: input.shippingAddress,
+            billingAddress: input.billingAddress,
+            notes: input.notes
+        });
     }
 
     async listOrders(input: ListOrdersQueryInput) {

@@ -1,7 +1,9 @@
 import { Response } from 'express';
+import { CustomerRequest } from '../../middlewares/customer.middleware';
 import { AuthenticatedAdminRequest } from '../../types';
 import { handleError } from '../../utils/error-handler';
 import {
+    createCustomerOrderSchema,
     createOrderSchema,
     listOrdersQuerySchema,
     updateOrderSchema,
@@ -24,6 +26,20 @@ export class OrderController {
             });
         } catch (error) {
             handleError(error, res, 'Order creation error:');
+        }
+    };
+
+    createCustomerOrder = async (req: CustomerRequest, res: Response) => {
+        try {
+            const input = createCustomerOrderSchema.parse(req.body);
+            const order = await this.orderService.createCustomerOrder(req.user!.id, input);
+
+            res.status(201).json({
+                message: 'Order created successfully',
+                data: { order }
+            });
+        } catch (error) {
+            handleError(error, res, 'Customer order creation error:');
         }
     };
 
