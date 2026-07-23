@@ -8,6 +8,7 @@ export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: {
     path: "prisma/migrations",
+    seed: "node dist/prisma/seed.js",
   },
   engine: "classic",
   datasource: {
