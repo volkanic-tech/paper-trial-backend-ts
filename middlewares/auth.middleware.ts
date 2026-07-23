@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import { Admin } from "../generated/prisma/client";
 import prisma from "../config/prisma";
+import { BadRequestError, ForbiddenError, NotFoundError, UnauthorizedError } from "../modules/common/error";
 dotenv.config();
 
 interface AdminRequest extends Request {
@@ -20,8 +21,7 @@ const adminAuthMiddleware = (requiredRole?: string) => {
         const authHeader = req.header("Authorization");
 
         if (!authHeader || !authHeader.startsWith("Bearer ")) {
-            res.status(401).json({ message: "Access denied. No token provided." });
-            return
+            throw new UnauthorizedError("Access denied. No token provided.");
         }
 
         const token = authHeader.split(" ")[1];
@@ -33,17 +33,15 @@ const adminAuthMiddleware = (requiredRole?: string) => {
 
             if (!user) {
                 res.status(404).json({ message: "Admin account not found." });
-                return
+                throw new NotFoundError("Admin account not found.");
             }
 
             if (!user.isActive) {
-                res.status(403).json({ message: "Admin account is not activated!" });
-                return
+                throw new ForbiddenError("Admin account is not activated!");
             }
 
             if (decoded.base_role !== 'admin') {
-                res.status(403).json({ message: "Access denied. Not an admin account." });
-                return
+                throw new ForbiddenError("Access denied. Not an admin account.");
             }
 
             req.user = user;
@@ -60,8 +58,7 @@ const adminAuthMiddleware = (requiredRole?: string) => {
 
             next();
         } catch (err) {
-            res.status(400).json({ message: "Invalid token." });
-            return
+            throw new BadRequestError("Invalid token.");
         }
     };
 
